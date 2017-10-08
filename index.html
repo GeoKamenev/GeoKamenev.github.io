@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Todo React.Component</title>
+    <title>Todo React-Redux</title>
     <style>
         body{
             margin: 0;
@@ -17,18 +17,18 @@
             padding: 0;
             background-color: #eee;
         }
-        .content > form{
+        .content > div > form{
             display: flex;
             flex-direction: column;
         }
 
-        .content > form > input{
+        .content > div > form > input{
             background: none;
             border: none;
             padding: .5rem;
         }
 
-        .content > form > input:focus{
+        .content > div > form > input:focus{
             outline: none;
         }
 
@@ -52,7 +52,7 @@
             justify-content: space-between;
         }
 
-        .done{
+        ul > .completed{
             text-decoration:line-through;
         }
 
@@ -74,7 +74,6 @@
         button{
             border: none;
             background: none;
-            outline: none;
         }
 
         button:hover{
@@ -84,7 +83,7 @@
         .button{
             width: 2rem;
             height: 2rem;
-            opacity: 0;            
+            opacity: 0;
         }
 
         .button:hover{
@@ -113,15 +112,15 @@
             border-radius: 0.2rem;
         }
 
-        .filtreall{
+        section > .all:nth-child(1){
             border: 1px solid #bb865e;
         }
 
-        .activedone{
+        section > .completed:nth-child(2){
             border: 1px solid #bb865e;
         }
 
-        .complit{
+        section > .uncompleted:nth-child(3){
             border: 1px solid #bb865e;
         }
 
@@ -133,6 +132,6 @@
 </head>
 <body>
 <div id = "root"></div>
-<script type="text/javascript" src="bundle.js" charset="utf-8"></script>
+<script type="text/javascript" src="../bundle.js" charset="utf-8"></script>
 </body>
 </html>
