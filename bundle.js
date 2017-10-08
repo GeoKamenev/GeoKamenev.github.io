@@ -23419,6 +23419,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var App = function App(_ref) {
     var todos = _ref.todos,
+        filterTodos = _ref.filterTodos,
         actions = _ref.actions;
 
     return _react2.default.createElement(
@@ -23429,14 +23430,20 @@ var App = function App(_ref) {
             null,
             'TODO'
         ),
-        _react2.default.createElement(_TodoComponents.AddTodo, { newTodo: actions.newTodo }),
-        _react2.default.createElement(_TodoComponents.TodoList, { todos: todos })
+        _react2.default.createElement(
+            'div',
+            { className: 'content' },
+            _react2.default.createElement(_TodoComponents.AddTodo, { actions: actions }),
+            _react2.default.createElement(_TodoComponents.TodoList, { todos: todos, filterTodos: filterTodos, actions: actions }),
+            _react2.default.createElement(_TodoComponents.TodoMenu, { todos: todos, filterTodos: filterTodos, actions: actions })
+        )
     );
 };
 
 var mapStateToProps = function mapStateToProps(state) {
     return {
-        todos: state.todos
+        todos: state.todos,
+        filterTodos: state.filterTodos
     };
 };
 
@@ -24814,7 +24821,7 @@ function verifySubselectors(mapStateToProps, mapDispatchToProps, mergeProps, dis
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.TodoList = exports.AddTodo = undefined;
+exports.TodoMenu = exports.TodoList = exports.AddTodo = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -24848,8 +24855,8 @@ var AddTodo = exports.AddTodo = function (_React$Component) {
             text: ''
         }, _this.onSubmit = function (event) {
             event.preventDefault();
-            var text = _this.state.text;
-            _this.props.newTodo(text);
+            var text = _this.state.text.trim();
+            _this.props.actions.newTodo(text);
             _this.setState({ text: '' });
         }, _this.onChange = function (event) {
             _this.setState({ text: event.target.value });
@@ -24892,17 +24899,28 @@ var TodoList = exports.TodoList = function (_React$Component2) {
     _createClass(TodoList, [{
         key: 'render',
         value: function render() {
-            console.log(this.props.todos);
+            var _props = this.props,
+                todos = _props.todos,
+                filterTodos = _props.filterTodos;
+            var _props$actions = this.props.actions,
+                deleteTodo = _props$actions.deleteTodo,
+                completeTodo = _props$actions.completeTodo;
+
             return _react2.default.createElement(
                 'ul',
                 null,
-                this.props.todos.map(function (todo) {
-                    _react2.default.createElement(
+                todos.filter(function (todo) {
+                    return todo.completed !== filterTodos;
+                }).map(function (todo) {
+                    return _react2.default.createElement(
                         'li',
-                        { key: todo.id },
+                        { className: todo.completed, key: todo.id },
                         _react2.default.createElement('input', {
                             type: 'checkbox',
-                            checked: todo.completed
+                            defaultChecked: todo.completed !== 'uncompleted' ? true : false,
+                            onClick: function onClick() {
+                                return completeTodo(todo.id);
+                            }
                         }),
                         _react2.default.createElement(
                             'label',
@@ -24912,8 +24930,10 @@ var TodoList = exports.TodoList = function (_React$Component2) {
                         _react2.default.createElement('div', { className: 'spacer' }),
                         _react2.default.createElement(
                             'button',
-                            { className: 'button'
-
+                            { className: 'button',
+                                onClick: function onClick() {
+                                    return deleteTodo(todo.id);
+                                }
                             },
                             'X'
                         )
@@ -24924,6 +24944,106 @@ var TodoList = exports.TodoList = function (_React$Component2) {
     }]);
 
     return TodoList;
+}(_react2.default.Component);
+
+var TodoMenu = exports.TodoMenu = function (_React$Component3) {
+    _inherits(TodoMenu, _React$Component3);
+
+    function TodoMenu() {
+        _classCallCheck(this, TodoMenu);
+
+        return _possibleConstructorReturn(this, (TodoMenu.__proto__ || Object.getPrototypeOf(TodoMenu)).apply(this, arguments));
+    }
+
+    _createClass(TodoMenu, [{
+        key: 'handleMenu',
+        value: function handleMenu() {
+            var _props2 = this.props,
+                todos = _props2.todos,
+                filterTodos = _props2.filterTodos;
+            var _props$actions2 = this.props.actions,
+                clearCompleted = _props$actions2.clearCompleted,
+                switchAll = _props$actions2.switchAll,
+                switchUncomplete = _props$actions2.switchUncomplete,
+                switchComplete = _props$actions2.switchComplete;
+
+
+            if (todos.length > 0) {
+                var completedCount = todos.reduce(function (count, todo) {
+                    return todo.completed ? count + 1 : count;
+                }, 0);
+
+                var uncompletedCount = todos.length - completedCount;
+
+                var itemsUncompleted = uncompletedCount === 1 ? "item" : "items";
+
+                return _react2.default.createElement(
+                    'div',
+                    { className: 'handleMenu' },
+                    _react2.default.createElement(
+                        'span',
+                        null,
+                        uncompletedCount,
+                        ' ',
+                        itemsUncompleted,
+                        ' left'
+                    ),
+                    _react2.default.createElement(
+                        'section',
+                        null,
+                        _react2.default.createElement(
+                            'a',
+                            {
+                                className: filterTodos,
+                                onClick: function onClick() {
+                                    return switchAll();
+                                }
+                            },
+                            'All'
+                        ),
+                        _react2.default.createElement(
+                            'a',
+                            {
+                                className: filterTodos,
+                                onClick: function onClick() {
+                                    return switchUncomplete();
+                                }
+                            },
+                            'Active'
+                        ),
+                        _react2.default.createElement(
+                            'a',
+                            {
+                                className: filterTodos,
+                                onClick: function onClick() {
+                                    return switchComplete();
+                                }
+                            },
+                            'Complited'
+                        )
+                    ),
+                    _react2.default.createElement(
+                        'button',
+                        { onClick: function onClick() {
+                                return clearCompleted();
+                            } },
+                        'Clear Completed'
+                    )
+                );
+            }
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            return _react2.default.createElement(
+                'div',
+                null,
+                this.handleMenu()
+            );
+        }
+    }]);
+
+    return TodoMenu;
 }(_react2.default.Component);
 
 /***/ }),
@@ -24943,6 +25063,44 @@ var newTodo = exports.newTodo = function newTodo(text) {
     };
 };
 
+var deleteTodo = exports.deleteTodo = function deleteTodo(id) {
+    return {
+        type: 'DELETE_TODO',
+        id: id
+    };
+};
+
+var completeTodo = exports.completeTodo = function completeTodo(id) {
+    return {
+        type: 'COMPLETE_TODO',
+        id: id
+    };
+};
+
+var clearCompleted = exports.clearCompleted = function clearCompleted() {
+    return {
+        type: 'CLEAR_COMPLETED'
+    };
+};
+
+var switchAll = exports.switchAll = function switchAll() {
+    return {
+        type: 'SWITCH_ALL'
+    };
+};
+
+var switchUncomplete = exports.switchUncomplete = function switchUncomplete() {
+    return {
+        type: 'SWITCH_UNCOMPLETE'
+    };
+};
+
+var switchComplete = exports.switchComplete = function switchComplete() {
+    return {
+        type: 'SWITCH_COMPLETE'
+    };
+};
+
 /***/ }),
 /* 228 */
 /***/ (function(module, exports, __webpack_require__) {
@@ -24956,14 +25114,19 @@ Object.defineProperty(exports, "__esModule", {
 
 var _redux = __webpack_require__(33);
 
-var _todos = __webpack_require__(229);
+var _filters = __webpack_require__(229);
+
+var _filters2 = _interopRequireDefault(_filters);
+
+var _todos = __webpack_require__(230);
 
 var _todos2 = _interopRequireDefault(_todos);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var Reducer = (0, _redux.combineReducers)({
-    todos: _todos2.default
+    todos: _todos2.default,
+    filterTodos: _filters2.default
 });
 
 exports.default = Reducer;
@@ -24978,33 +25141,82 @@ exports.default = Reducer;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.default = todos;
 
-var _uuid = __webpack_require__(230);
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+function filterTodos() {
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'all';
+    var actions = arguments[1];
 
-var newState = [];
+    switch (actions.type) {
+        case 'SWITCH_ALL':
+            return state = 'all';
 
-function todos() {
-    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : newState;
-    var action = arguments[1];
+        case 'SWITCH_UNCOMPLETE':
+            return state = 'completed';
 
-    switch (action.type) {
-        case 'ADD_TODO':
-            return [].concat(_toConsumableArray(state), [{
-                id: (0, _uuid.uuid)(),
-                completed: false,
-                text: action.text
-            }]);
+        case 'SWITCH_COMPLETE':
+            return state = 'uncompleted';
 
         default:
             return state;
     }
 }
 
+exports.default = filterTodos;
+
 /***/ }),
 /* 230 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _uuid = __webpack_require__(231);
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+function todos() {
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+    var action = arguments[1];
+
+    switch (action.type) {
+        case 'ADD_TODO':
+            return [].concat(_toConsumableArray(state), [{
+                id: (0, _uuid.uuid)(),
+                completed: 'uncompleted',
+                text: action.text
+            }]);
+
+        case 'DELETE_TODO':
+            return state.filter(function (todo) {
+                return todo.id !== action.id;
+            });
+
+        case 'COMPLETE_TODO':
+            return state.map(function (todo) {
+                return todo.id === action.id ? _extends({}, todo, { completed: todo.completed !== "uncompleted" ? 'uncompleted' : 'completed' }) : todo;
+            });
+
+        case 'CLEAR_COMPLETED':
+            return state.filter(function (todo) {
+                return todo.completed !== 'completed';
+            });
+
+        default:
+            return state;
+    }
+}
+
+exports.default = todos;
+
+/***/ }),
+/* 231 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
